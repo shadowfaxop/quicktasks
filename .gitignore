@@ -1,0 +1,22 @@
+# Xcode
+DerivedData/
+xcuserdata/
+*.xcuserstate
+
+# Build
+build/
+*.ipa
+
+# Swift Package artifacts
+*.swiftpm
+Package.resolved
+
+# CocoaPods (if ever used)
+Pods/
+
+# User-specific
+*.DS_Store
+
+# Certificates / signing
+*.p12
+*.mobileprovision

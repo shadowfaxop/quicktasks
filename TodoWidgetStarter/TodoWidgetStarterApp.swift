@@ -9,9 +9,19 @@ import SwiftUI
 
 @main
 struct TodoWidgetStarterApp: App {
+    @State private var focusAddField = false
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            MainTodoView()
+                .onOpenURL { url in
+                    if url.absoluteString == "todoapp://add" {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                            NotificationCenter.default.post(name: .focusAddField, object: nil)
+                        }
+                    }
+                }
+
         }
     }
 }
