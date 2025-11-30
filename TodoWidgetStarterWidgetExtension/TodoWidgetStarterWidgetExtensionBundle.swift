@@ -12,6 +12,7 @@ import SwiftUI
 struct TodoWidgetStarterWidgetExtensionBundle: WidgetBundle {
     var body: some Widget {
         TodoWidgetStarterWidgetExtension()
+        TodoCountLockWidget()
         TodoWidgetStarterWidgetExtensionControl()
         TodoWidgetStarterWidgetExtensionLiveActivity()
     }
