@@ -12,6 +12,7 @@
 import SwiftUI
 
 struct MainTodoView: View {
+    @State private var selectedTab = 0
 
     @FocusState private var textFieldFocused: Bool
 
@@ -21,7 +22,6 @@ struct MainTodoView: View {
     @State private var showDeleteAlert = false
     @State private var taskToDelete: TodoItem?
 
-    @State private var selectedTab = 0
 
     func refresh() {
         tasks = TaskManager.shared.loadTasks()
@@ -34,21 +34,40 @@ struct MainTodoView: View {
             NavigationView {
                 VStack {
 
-                    // Input Row
-                    HStack {
-                        TextField("Add Task...", text: $text)
-                            .textFieldStyle(.roundedBorder)
+                    /// MARK: - Input Row
+                    HStack(spacing: 14) {
+
+                        TextField("Add a new task...", text: $text)
+                            .padding(.vertical, 14)          // ⬆️ Taller height
+                            .padding(.horizontal, 12)
+                            .background(Color(.secondarySystemBackground))
+                            .cornerRadius(12)
+                            .font(.system(size: 18))         // ⬆️ Bigger font
                             .focused($textFieldFocused)
 
-                        Button("Add") {
+
+                        Button(action: {
                             guard !text.isEmpty else { return }
                             TaskManager.shared.addTask(title: text)
                             text = ""
+                            textFieldFocused = false
                             refresh()
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                                UIImpactFeedbackGenerator(style: .soft).impactOccurred()
+                            }
+                        }) {
+                            Text("Add")
+                                .font(.system(size: 18, weight: .bold))
+                                .padding(.vertical, 14)       // ⬆️ Bigger button height
+                                .padding(.horizontal, 20)
+                                .background(Color.blue)
+                                .foregroundColor(.white)
+                                .cornerRadius(12)
                         }
-                        .buttonStyle(.borderedProminent)
                     }
-                    .padding()
+                    .padding(.horizontal)
+                    .padding(.top, 6)
+
 
                     // Task List
                     List {
@@ -128,6 +147,28 @@ struct MainTodoView: View {
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
             refresh()
         }
+        .onOpenURL { url in
+            if url.absoluteString == "todoapp://add" {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    selectedTab = 0
+                    textFieldFocused = true
+                }
+            }
+            else {
+                selectedTab = 0
+                textFieldFocused = false
+            }
+        }
+        .onAppear {
+            if textFieldFocused {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    textFieldFocused = true
+                }
+                textFieldFocused = false
+            }
+        }
+
+
     }
 
     // MARK: - Placeholder View

@@ -25,15 +25,13 @@ struct TodoWidgetView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             
-            Text("Today's Tasks")
-                .font(.headline)
-                .bold()
 
             // ---- Task List ----
             VStack(alignment: .leading, spacing: 8) {
                 ForEach(activeTasks.prefix(maxVisible)) { task in
                     taskRow(task)
                 }
+                
                 
                 if activeTasks.count > maxVisible {
                     Text("+ \(activeTasks.count - maxVisible) more…")
@@ -47,20 +45,21 @@ struct TodoWidgetView: View {
             // ---- Add Button ----
             HStack {
                 Spacer() // keeps it right-aligned
-                Button {
-                    // Action handled by widgetURL
-                } label: {
-                    Text("+ Task")
-                        .font(.footnote.bold())
+                Link(destination: URL(string: "todoapp://add")!) {
+                    Image(systemName: "plus.circle.fill")
+                        .font(.system(size: 30))   // Bigger, tappable
                         .foregroundColor(.blue)
-                        .padding(.horizontal, 4)   // tiny touch padding (optional)
-                        .padding(.vertical, 2)
-                        .contentShape(Rectangle()) // improves tap area without changing look
+                        .padding(.all, 8)
                 }
-                .widgetURL(URL(string: "todoapp://add")!)
+                .simultaneousGesture(TapGesture().onEnded {
+                    UIImpactFeedbackGenerator(style: .soft).impactOccurred()
+                })
+
             }
         }
         .padding(18)
+        .modifier(ContainerBackgroundCompat())
+        .widgetURL(URL(string: "todoapp://open")!)
     }
     
     // MARK: Animated Row Component
@@ -94,3 +93,13 @@ struct TodoWidgetView: View {
     }
 }
 
+private struct ContainerBackgroundCompat: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(iOS 17.0, macOS 14.0, watchOS 10.0, tvOS 17.0, *) {
+            content.containerBackground(.background, for: .widget)
+        } else {
+            // Fallback for older SDKs where widget background style isn't available
+            content.background(Color.clear)
+        }
+    }
+}
