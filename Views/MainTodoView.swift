@@ -26,6 +26,27 @@ struct MainTodoView: View {
     func refresh() {
         tasks = TaskManager.shared.loadTasks()
     }
+    
+    func moveTask(from source: IndexSet, to destination: Int) {
+        var updated = tasks
+        updated.move(fromOffsets: source, toOffset: destination)
+
+        tasks = updated
+        TaskManager.shared.saveTasks(updated)
+
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+    }
+
+    
+    func deleteTask(at offsets: IndexSet) {
+        if let index = offsets.first {
+            let task = tasks[index]
+            TaskManager.shared.deleteTask(id: task.id)
+            refresh()
+        }
+    }
+
+
 
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -93,7 +114,11 @@ struct MainTodoView: View {
                             taskToDelete = tasks[indexSet.first!]
                             showDeleteAlert = true
                         }
+                        .onMove(perform: moveTask)
+                        .onDelete(perform: deleteTask)
                     }
+                    .listStyle(.plain)
+                    .environment(\.editMode, .constant(.inactive))
                 }
                 .navigationTitle("Today's Tasks")
                 .alert("Delete this task?", isPresented: $showDeleteAlert) {
